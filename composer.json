@@ -16,7 +16,7 @@
             "AlexPCooper\\": "src/"
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "authors": [
         {
             "name": "Alex Cooper",
