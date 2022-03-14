@@ -1,13 +1,17 @@
 {
     "name": "alexpcooper/newsletters-to-kindle",
     "description": "Uses IMAP to check a mailbox, converts HTML newsletter emails to PDFs and sends them to Amazon Kindle email address",
-    "keywords": ["amazon", "kindle", "email", "pdf", "epub"],
+    "keywords": ["amazon", "kindle", "email", "pdf", "mpdf", "epub", "html", "utf8", "utf-8"],
+    "homepage": "https://github.com/alexpcooper/newsletters-to-kindle/",
     "type": "project",
     "license": "mit",
     "require": {
-        "php": ">=7.0",
+        "php": ">=7.4"
         "mpdf/mpdf": "^8.0",
         "zbateson/mail-mime-parser": "^2.2",
+
+    },
+    "require-dev": {
         "phpmailer/phpmailer": "^6.6"
     },
     "autoload": {
