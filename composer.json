@@ -3,7 +3,7 @@
     "description": "Uses IMAP to check a mailbox, converts HTML newsletter emails to PDFs and sends them to Amazon Kindle email address",
     "keywords": ["amazon", "kindle", "email", "pdf", "mpdf", "epub", "html", "utf8", "utf-8", "imap", "smtp"],
     "homepage": "https://github.com/alexpcooper/newsletters-to-kindle/",
-    "type": "project",
+    "type": "package",
     "license": "mit",
     "require": {
         "php": ">=7.4"
