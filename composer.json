@@ -1,8 +1,11 @@
 {
     "name": "alexpcooper/newsletters-to-kindle",
     "description": "Uses IMAP to check a mailbox, converts HTML newsletter emails to PDFs and sends them to Amazon Kindle email address",
+    "keywords": ["amazon", "kindle", "email", "pdf", "epub"],
     "type": "project",
+    "license": "mit",
     "require": {
+        "php": ">=7.0",
         "mpdf/mpdf": "^8.0",
         "zbateson/mail-mime-parser": "^2.2",
         "phpmailer/phpmailer": "^6.6"
@@ -12,7 +15,7 @@
             "AlexPCooper\\": "src/"
         }
     },
-    "minimum-stability": "dev-master",
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "Alex Cooper",
