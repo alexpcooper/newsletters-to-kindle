@@ -33,7 +33,7 @@
     "repositories":[
     	{
     		"type": "vcs",
-    		"url": "git@alexpcooper/newsletters-to-kindle.git"
+    		"url": "https://github.com/alexpcooper/newsletters-to-kindle"
     	}
     ]
 }
