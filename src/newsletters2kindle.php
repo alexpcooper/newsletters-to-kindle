@@ -38,7 +38,7 @@
                 $this->makePDF();
                 $this->sendToKindle();
 
-                // imap_delete($this->imap_conn, 1);
+                imap_delete($this->imap_conn, 1);
             }
 
             if ($this->imap_conn)
