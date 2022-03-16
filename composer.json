@@ -10,19 +10,12 @@
         "mpdf/mpdf": "^8.0",
         "zbateson/mail-mime-parser": "^2.2",
         "phpmailer/phpmailer": "^6.6",
-        "alexpcooper/newsletters-to-kindle": "dev-master@dev"
-    },
-    "source": {
-          "url": "https://github.com/alexpcooper/newsletters-to-kindle.git",
-          "type": "git",
-          "reference": "master"
     },
     "autoload": {
         "psr-4": {
             "AlexPCooper\\": "src/"
         }
     },
-    "minimum-stability": "stable",
     "authors": [
         {
             "name": "Alex Cooper",
@@ -31,10 +24,4 @@
             "github": "https://github.com/alexpcooper/"
         }
     ],
-    "repositories":[
-    	{
-    		"type": "vcs",
-    		"url": "https://github.com/alexpcooper/newsletters-to-kindle"
-    	}
-    ]
 }
