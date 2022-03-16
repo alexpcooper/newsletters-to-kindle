@@ -85,7 +85,7 @@
         {
 
             // use the email subject as the subject of the PDF
-            $this->mail_subject = $this->mail_message->getHeaderValue(HeaderConsts::SUBJECT);
+            $this->mail_subject = utf8_encode($this->mail_message->getHeaderValue(HeaderConsts::SUBJECT));
             if (strlen(trim($this->mail_subject)) == 0)
             {
                 $this->mail_subject = 'Newsletter';
@@ -102,7 +102,7 @@
 
             $this->pdf_document->SetSubject($this->mail_subject); 
 
-            $this->pdf_document->WriteHTML('<h1>'.$this->mail_subject.'</h1><h2>'.$this->mail_message->getHeader(HeaderConsts::FROM)->getPersonName().'</h2>');
+            $this->pdf_document->WriteHTML('<h1>'.$this->mail_subject.'</h1><h2>'.utf8_encode($this->mail_message->getHeader(HeaderConsts::FROM)->getPersonName()).'</h2>');
             $this->pdf_document->AddPage();
 
             // chunk the email body because otherwise you can get issues with blank pages
