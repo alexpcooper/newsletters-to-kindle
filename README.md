@@ -1,8 +1,8 @@
 # Newsletters to Kindle
 Uses IMAP to check a mailbox, converts HTML newsletter emails to PDFs and sends them to an Amazon Kindle email address
 
-[![Latest Stable Version](https://poser.pugx.org/alexpcooper/newsletters-to-kindle/v/stable)](https://packagist.org/packages/mpdf/mpdf)
-[![Total Downloads](https://poser.pugx.org/alexpcooper/newsletters-to-kindle/downloads)](https://packagist.org/packages/mpdf/mpdf)
+[![Latest Stable Version](https://poser.pugx.org/alexpcooper/newsletters-to-kindle/v/stable)](https://packagist.org/packages/alexpcooper/newsletters-to-kindle)
+[![Total Downloads](https://poser.pugx.org/alexpcooper/newsletters-to-kindle/downloads)](https://packagist.org/packages/alexpcooper/newsletters-to-kindle)
 [![License](https://poser.pugx.org/alexpcooper/newsletters-to-kindle/license)](https://packagist.org/packages/alexpcooper/newsletters-to-kindle)
 
 
@@ -64,5 +64,7 @@ $newsletter2kindle->debug     = true;
 * Ensure that your "kindle_email" address is correct as it appears on your Amazon account for receiving documents (see [Edit Your Send to Kindle Email Address](https://www.amazon.co.uk/gp/help/customer/display.html?ref_=hp_left_v4_sib&nodeId=G7V489F2ZZU9JJGE))
 * Ensure that your sending email address is permitted to send documents to your Amazon Kindle (see [Add an Email Address to Receive Documents in Your Kindle Library](https://www.amazon.co.uk/gp/help/customer/display.html?nodeId=GX9XLEVV8G4DB28H))
 
+
 ## Known Issues
-Due to the composition of emails, occasionally a block of style tags may be printed onto the end document. 
+* Due to the composition of emails, occasionally a block of style tags may be printed onto the end document.
+* Amazon have begun triggering an email on each document sent: "We received a request to send the following document to your Kindle account", before the document is converted and appears in your Kindle library
