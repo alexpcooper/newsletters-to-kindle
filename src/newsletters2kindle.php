@@ -19,15 +19,18 @@
         public $imap_pass;
 
         public $debug;
+        public $delete_mail_after;
 
         private $imap_conn;
         private $mail_message;
         private $pdf_document;
         private $mail_subject;
+        private $mail_from;
 
         function __construct() 
         {
-            $this->debug = false;
+            $this->debug                = false;
+            $this->delete_mail_after    = true;
         }
 
         public function checkMail()
@@ -38,7 +41,10 @@
                 $this->makePDF();
                 $this->sendToKindle();
 
-                imap_delete($this->imap_conn, 1);
+                if ($this->delete_mail_after)
+                {
+                    imap_delete($this->imap_conn, 1);
+                }
             }
 
             if ($this->imap_conn)
@@ -69,13 +75,19 @@
             $imap_body = imap_fetchbody($this->imap_conn, 1, "");
     
             // clean up, as best as we can, the raw HTML / styling from the email body
+            $imap_body = str_replace('type=3D"text"', 'type="text', $imap_body);
             $imap_body = str_replace('<style type=3D"text/css">', '<style type="text/css">', $imap_body);
+            $imap_body = str_replace('<style amf:inline=3D"amf:inline" type=3D"text/css">', '<style type="text/css">', $imap_body);
+            $imap_body = str_replace('<style amf:inline="amf:inline" type="text/css">', '<style type="text/css">', $imap_body);
             $imap_body = strip_tags($imap_body, '<style><a><p>><br><br /><b><strong><u><i><em><img><h1><h2><h3><h4><h5><h6>');
             $imap_body = preg_replace('#<style type="text/css">.*?</style>#s', '', $imap_body);
     
             // create MailMimeParser
             $mail_parser = new MailMimeParser();
             $this->mail_message = $mail_parser->parse($imap_body, true);
+
+ //           var_dump($imap_body); die();
+// var_dump($this->mail_message->getHtmlContent()); die();
 
             return true;
         }
@@ -85,10 +97,16 @@
         {
 
             // use the email subject as the subject of the PDF
-            $this->mail_subject = utf8_encode($this->mail_message->getHeaderValue(HeaderConsts::SUBJECT));
+            $this->mail_subject = utf8_encode(imap_utf8($this->mail_message->getHeaderValue(HeaderConsts::SUBJECT)));
             if (strlen(trim($this->mail_subject)) == 0)
             {
                 $this->mail_subject = 'Newsletter';
+            }
+
+            $this->mail_from = utf8_encode(imap_utf8($this->mail_message->getHeader(HeaderConsts::FROM)->getPersonName()));
+            if (strlen(trim($this->mail_from)) == 0)
+            {
+                $this->mail_from = imap_utf8($this->mail_message->getHeader(HeaderConsts::FROM));
             }
             
 
@@ -101,8 +119,11 @@
             $this->pdf_document->charset_in='UTF-8';
 
             $this->pdf_document->SetSubject($this->mail_subject); 
+            $this->pdf_document->SetTitle($this->mail_subject);
+            $this->pdf_document->SetAuthor($this->mail_from);
+            $this->pdf_document->SetCreator('Newsletters To Kindle');
 
-            $this->pdf_document->WriteHTML('<h1>'.$this->mail_subject.'</h1><h2>'.utf8_encode($this->mail_message->getHeader(HeaderConsts::FROM)->getPersonName()).'</h2>');
+            $this->pdf_document->WriteHTML('<h1>'.$this->mail_subject.'</h1><h2>'.utf8_encode($this->mail_from).'</h2>');
             $this->pdf_document->AddPage();
 
             // chunk the email body because otherwise you can get issues with blank pages
@@ -111,7 +132,7 @@
                 $this->pdf_document->WriteHTML(mb_convert_encoding($chunk, "HTML-ENTITIES", "UTF-8"));
             }
     
-            // $this->pdf_document->Output(); die();
+           // $this->pdf_document->Output(); die();
 
             return $this->pdf_document;
         }
@@ -135,8 +156,11 @@
                 $mail->setFrom($this->imap_email);
                 $mail->addAddress($this->kindle_email);
 
-                $mail->addAddress($this->imap_email);
-    
+                if ($this->debug)
+                {
+                    $mail->addAddress($this->imap_email);
+                }
+
                 //Attachments
                 $mail->AddStringAttachment( $this->pdf_document->Output('', 'S') , utf8_encode($this->mail_subject).'.pdf', 'base64', 'application/pdf');
     
