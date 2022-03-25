@@ -46,6 +46,10 @@
                     imap_delete($this->imap_conn, 1);
                 }
             }
+            elseif ($this->debug)
+            {
+                echo 'No newsletters / emails found';
+            }
 
             if ($this->imap_conn)
             {
@@ -86,8 +90,8 @@
             $mail_parser = new MailMimeParser();
             $this->mail_message = $mail_parser->parse($imap_body, true);
 
- //           var_dump($imap_body); die();
-// var_dump($this->mail_message->getHtmlContent()); die();
+            // var_dump($imap_body); die();
+            // var_dump($this->mail_message->getHtmlContent()); die();
 
             return true;
         }
@@ -97,7 +101,7 @@
         {
 
             // use the email subject as the subject of the PDF
-            $this->mail_subject = utf8_encode(imap_utf8($this->mail_message->getHeaderValue(HeaderConsts::SUBJECT)));
+            $this->mail_subject = trim(utf8_encode(imap_utf8($this->replace_4byte($this->mail_message->getHeaderValue(HeaderConsts::SUBJECT)))));
             if (strlen(trim($this->mail_subject)) == 0)
             {
                 $this->mail_subject = 'Newsletter';
@@ -108,7 +112,9 @@
             {
                 $this->mail_from = imap_utf8($this->mail_message->getHeader(HeaderConsts::FROM));
             }
-            
+            $this->mail_from = trim(str_replace('From: ', '', $this->mail_from));
+
+
 
             $this->pdf_document = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4', 'default_font_size' => 25, 'orientation' => 'P', 'ignore_table_widths' => true, 'shrink_tables_to_fit' => false ]);
         
@@ -132,7 +138,7 @@
                 $this->pdf_document->WriteHTML(mb_convert_encoding($chunk, "HTML-ENTITIES", "UTF-8"));
             }
     
-           // $this->pdf_document->Output(); die();
+            // $this->pdf_document->Output(); die();
 
             return $this->pdf_document;
         }
@@ -187,5 +193,17 @@
             }
     
 
+        }
+
+
+        // to remove 4byte characters like emojis etc..
+        // https://stackoverflow.com/questions/12807176/php-writing-a-simple-removeemoji-function
+        private function replace_4byte($string) 
+        {
+            return preg_replace('%(?:
+                  \xF0[\x90-\xBF][\x80-\xBF]{2}      # planes 1-3
+                | [\xF1-\xF3][\x80-\xBF]{3}          # planes 4-15
+                | \xF4[\x80-\x8F][\x80-\xBF]{2}      # plane 16
+            )%xs', '', $string);    
         }
     }
