@@ -42,23 +42,35 @@ $newsletter2kindle->checkMail();
 
 ```
 
+## Debug
+
+As the process of sending an email to a 3rd party (Amazon) is "fire and forget", without any confirmation or failure, there are two optional parameters, in the event of needing to troubleshoot.
+
+Add one or both of these prior to calling `checkMail()`.
+
+```php
+$newsletter2kindle->debug               = true; // false by default or when not specified
+$newsletter2kindle->delete_mail_after   = false; // true by default or when not specified
+
+```
+
 ### Parameters
 
 | Parameter 	| Explanation 	|
 |---	|---	|
 | kindle_email 	| Used to send the PDF email to, so that it goes to your Amazon account 	|
-| imap settings  	| Used to both check an email directory, such as your inbox, for an email to convert, as well as to send the PDF to   	|
+| imap settings  	| Used to both check an email directory, such as your inbox, for an email to convert, as well as to send the PDF to Amazon as the FROM  address 	|
 | imap_dir  	| This can be your inbox or a subfolder, eg. "Inbox", "[Gmail]/All Mail", "my-newsletters", etc.  	|
+| debug 	| Prints out progress or any issues as it goes; for debugging only (defaults to false) 	|
+| delete_mail_after 	| Keeps the mail in the mailbox after processing (defaults to true) - note that subsequent requests will pick up the same email again 	|
 
 
-## Debug
+## Required Packages
+With thanks to the following for these dependancies;
+- https://github.com/mpdf/mpdf
+- https://github.com/zbateson/mail-mime-parser
+- https://github.com/swiftmailer/swiftmailer
 
-As the process of sending an email to a 3rd party (Amazon) is "fire and forget", without any confirmation or failure, an optional parameter will output what's happening, in the event of needing to troubleshoot. Add this prior to calling `checkMail()`.
-```php
-
-$newsletter2kindle->debug     = true;
-
-```
 
 ## Troubleshooting
 * Ensure that your "kindle_email" address is correct as it appears on your Amazon account for receiving documents (see [Edit Your Send to Kindle Email Address](https://www.amazon.co.uk/gp/help/customer/display.html?ref_=hp_left_v4_sib&nodeId=G7V489F2ZZU9JJGE))
@@ -66,5 +78,5 @@ $newsletter2kindle->debug     = true;
 
 
 ## Known Issues
-* Due to the composition of emails, occasionally a block of style tags may be printed onto the end document.
-* Amazon have begun triggering an email on each document sent: "We received a request to send the following document to your Kindle account", before the document is converted and appears in your Kindle library
+- Due to the composition of emails, occasionally a block of style tags may be printed onto the end document. This is caused by external sources, such as includes / images, being pulled in after the email is parsed.
+- At present the Kindle document appears in Amazon without an Author being populated, even though it's on the PDF. This seems to be caused on Amazon's side, when they convert the document.
