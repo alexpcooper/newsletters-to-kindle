@@ -65,11 +65,15 @@ $newsletter2kindle->delete_mail_after   = false; // true by default or when not 
 | delete_mail_after 	| Keeps the mail in the mailbox after processing (defaults to true) - note that subsequent requests will pick up the same email again 	|
 
 
-## Required Packages
+## Included Packages
 With thanks to the following for these dependancies;
 - https://github.com/mpdf/mpdf
 - https://github.com/zbateson/mail-mime-parser
 - https://github.com/swiftmailer/swiftmailer
+
+
+## Requirements
+- php's IMAP library (eg. extension=imap.so) needs to be enabled in your php.ini file
 
 
 ## Troubleshooting
