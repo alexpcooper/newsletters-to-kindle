@@ -106,11 +106,15 @@
             {
                 $this->mail_subject = 'Newsletter';
             }
+            if (substr(strtolower($this->mail_subject), 0, 3) == 're:' || substr(strtolower($this->mail_subject), 0, 3) == 'fw:')
+            {
+                $this->mail_subject = trim(substr($this->mail_subject, 3, strlen($this->mail_subject)-1));
+            }
 
-            $this->mail_from = utf8_encode(imap_utf8($this->mail_message->getHeader(HeaderConsts::FROM)->getPersonName()));
+            $this->mail_from = utf8_encode(imap_utf8($this->replace_4byte($this->mail_message->getHeader(HeaderConsts::FROM)->getPersonName())));
             if (strlen(trim($this->mail_from)) == 0)
             {
-                $this->mail_from = imap_utf8($this->mail_message->getHeader(HeaderConsts::FROM));
+                $this->mail_from = imap_utf8($this->replace_4byte($this->mail_message->getHeader(HeaderConsts::FROM)));
             }
             $this->mail_from = trim(str_replace('From: ', '', $this->mail_from));
 
