@@ -10,6 +10,8 @@
 
     class newsletters2kindle
     {
+        private $version;
+        
         public $kindle_email;
         public $imap_email;
         public $imap_host;
@@ -29,6 +31,7 @@
 
         function __construct() 
         {
+            $this->version              = 1.3.0;
             $this->debug                = false;
             $this->delete_mail_after    = true;
         }
@@ -131,7 +134,7 @@
             $this->pdf_document->SetSubject($this->mail_subject); 
             $this->pdf_document->SetTitle($this->mail_subject);
             $this->pdf_document->SetAuthor($this->mail_from);
-            $this->pdf_document->SetCreator('Newsletters To Kindle');
+            $this->pdf_document->SetCreator('Newsletters To Kindle v'.$this->version);
 
             $this->pdf_document->WriteHTML('<h1>'.$this->mail_subject.'</h1><h2>'.utf8_encode($this->mail_from).'</h2>');
             $this->pdf_document->AddPage();
