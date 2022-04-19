@@ -131,7 +131,7 @@
             $this->pdf_document->allow_charset_conversion=true;
             $this->pdf_document->charset_in='UTF-8';
 
-            $this->pdf_document->SetSubject($this->mail_subject); 
+            $this->pdf_document->SetSubject($this->mail_from.' '.$this->mail_subject);
             $this->pdf_document->SetTitle($this->mail_subject);
             $this->pdf_document->SetAuthor($this->mail_from);
             $this->pdf_document->SetCreator('Newsletters To Kindle v'.$this->version);
@@ -175,7 +175,7 @@
                 }
 
                 //Attachments
-                $mail->AddStringAttachment( $this->pdf_document->Output('', 'S') , utf8_encode($this->mail_subject).'.pdf', 'base64', 'application/pdf');
+                $mail->AddStringAttachment( $this->pdf_document->Output('', 'S') , $this->mail_subject.'.pdf', 'base64', 'application/pdf');
     
                 //Content
                 $mail->Subject = 'Convert'; // has to be this for ePub / Kindle format (or it provides it as PDF);
