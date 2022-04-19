@@ -31,7 +31,7 @@
 
         function __construct() 
         {
-            $this->version              = 1.3.0;
+            $this->version              = '1.3.0';
             $this->debug                = false;
             $this->delete_mail_after    = true;
         }
@@ -117,7 +117,7 @@
             $this->mail_from = utf8_encode(imap_utf8($this->replace_4byte($this->mail_message->getHeader(HeaderConsts::FROM)->getPersonName())));
             if (strlen(trim($this->mail_from)) == 0)
             {
-                $this->mail_from = imap_utf8($this->replace_4byte($this->mail_message->getHeader(HeaderConsts::FROM)));
+                $this->mail_from = utf8_encode(imap_utf8($this->replace_4byte($this->mail_message->getHeader(HeaderConsts::FROM))));
             }
             $this->mail_from = trim(str_replace('From: ', '', $this->mail_from));
 
@@ -131,7 +131,7 @@
             $this->pdf_document->allow_charset_conversion=true;
             $this->pdf_document->charset_in='UTF-8';
 
-            $this->pdf_document->SetSubject($this->mail_from.' '.$this->mail_subject);
+            $this->pdf_document->SetSubject($this->mail_from.': '.$this->mail_subject);
             $this->pdf_document->SetTitle($this->mail_subject);
             $this->pdf_document->SetAuthor($this->mail_from);
             $this->pdf_document->SetCreator('Newsletters To Kindle v'.$this->version);
@@ -208,7 +208,8 @@
         private function replace_4byte($text) 
         {
             $text = iconv('UTF-8', 'ISO-8859-15//IGNORE', $text);
-            $text = preg_replace('/\s+/', '', $text);
+            $text = preg_replace('/\s+/', ' ', $text);
+            $text = str_replace(' ,', ',', trim($text));
             return iconv('ISO-8859-15', 'UTF-8', $text);  
         }
     }
