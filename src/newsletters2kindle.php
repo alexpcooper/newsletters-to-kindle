@@ -10,6 +10,8 @@
 
     class newsletters2kindle
     {
+        private $version;
+        
         public $kindle_email;
         public $imap_email;
         public $imap_host;
@@ -29,6 +31,7 @@
 
         function __construct() 
         {
+            $this->version              = '1.3.0';
             $this->debug                = false;
             $this->delete_mail_after    = true;
         }
@@ -106,11 +109,15 @@
             {
                 $this->mail_subject = 'Newsletter';
             }
+            if (substr(strtolower($this->mail_subject), 0, 3) == 're:' || substr(strtolower($this->mail_subject), 0, 3) == 'fw:')
+            {
+                $this->mail_subject = trim(substr($this->mail_subject, 3, strlen($this->mail_subject)-1));
+            }
 
-            $this->mail_from = utf8_encode(imap_utf8($this->mail_message->getHeader(HeaderConsts::FROM)->getPersonName()));
+            $this->mail_from = utf8_encode(imap_utf8($this->replace_4byte($this->mail_message->getHeader(HeaderConsts::FROM)->getPersonName())));
             if (strlen(trim($this->mail_from)) == 0)
             {
-                $this->mail_from = imap_utf8($this->mail_message->getHeader(HeaderConsts::FROM));
+                $this->mail_from = utf8_encode(imap_utf8($this->replace_4byte($this->mail_message->getHeader(HeaderConsts::FROM))));
             }
             $this->mail_from = trim(str_replace('From: ', '', $this->mail_from));
 
@@ -124,10 +131,10 @@
             $this->pdf_document->allow_charset_conversion=true;
             $this->pdf_document->charset_in='UTF-8';
 
-            $this->pdf_document->SetSubject($this->mail_subject); 
+            $this->pdf_document->SetSubject($this->mail_from.': '.$this->mail_subject);
             $this->pdf_document->SetTitle($this->mail_subject);
             $this->pdf_document->SetAuthor($this->mail_from);
-            $this->pdf_document->SetCreator('Newsletters To Kindle');
+            $this->pdf_document->SetCreator('Newsletters To Kindle v'.$this->version);
 
             $this->pdf_document->WriteHTML('<h1>'.$this->mail_subject.'</h1><h2>'.utf8_encode($this->mail_from).'</h2>');
             $this->pdf_document->AddPage();
@@ -168,7 +175,7 @@
                 }
 
                 //Attachments
-                $mail->AddStringAttachment( $this->pdf_document->Output('', 'S') , utf8_encode($this->mail_subject).'.pdf', 'base64', 'application/pdf');
+                $mail->AddStringAttachment( $this->pdf_document->Output('', 'S') , $this->mail_subject.'.pdf', 'base64', 'application/pdf');
     
                 //Content
                 $mail->Subject = 'Convert'; // has to be this for ePub / Kindle format (or it provides it as PDF);
@@ -198,12 +205,11 @@
 
         // to remove 4byte characters like emojis etc..
         // https://stackoverflow.com/questions/12807176/php-writing-a-simple-removeemoji-function
-        private function replace_4byte($string) 
+        private function replace_4byte($text) 
         {
-            return preg_replace('%(?:
-                  \xF0[\x90-\xBF][\x80-\xBF]{2}      # planes 1-3
-                | [\xF1-\xF3][\x80-\xBF]{3}          # planes 4-15
-                | \xF4[\x80-\x8F][\x80-\xBF]{2}      # plane 16
-            )%xs', '', $string);    
+            $text = iconv('UTF-8', 'ISO-8859-15//IGNORE', $text);
+            $text = preg_replace('/\s+/', ' ', $text);
+            $text = str_replace(' ,', ',', trim($text));
+            return iconv('ISO-8859-15', 'UTF-8', $text);  
         }
     }
