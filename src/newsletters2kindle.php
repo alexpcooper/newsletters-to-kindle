@@ -221,14 +221,14 @@
 
             
             // remove all emojis, as it isn't compatible with PDF / Amazon Kindle format
-            $string = $this->replace_4byte($string);
+            $string_removed_emojies = $this->replace_4byte($string);
 
-            if (strlen($string) == 0)
+            if (strlen($string_removed_emojies) == 0)
             {
-                $string = $this->remove_emojis_without_iconv($string);
+                $string_removed_emojies = $this->remove_emojis_without_iconv($string);
             }
  
-            return $string;
+            return $string_removed_emojies;
         }
         
         // to remove 4byte characters like emojis etc..
