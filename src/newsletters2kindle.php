@@ -104,7 +104,7 @@
         {
 
             // use the email subject as the subject of the PDF
-            $this->mail_subject = trim(utf8_encode(imap_utf8($this->replace_4byte($this->mail_message->getHeaderValue(HeaderConsts::SUBJECT)))));
+            $this->mail_subject = trim($this->remove_emoji_chars(imap_utf8(strip_tags($this->mail_message->getHeaderValue(HeaderConsts::SUBJECT)))));
             if (strlen(trim($this->mail_subject)) == 0)
             {
                 $this->mail_subject = 'Newsletter';
@@ -114,13 +114,15 @@
                 $this->mail_subject = trim(substr($this->mail_subject, 3, strlen($this->mail_subject)-1));
             }
 
-            $this->mail_from = utf8_encode(imap_utf8($this->replace_4byte($this->mail_message->getHeader(HeaderConsts::FROM)->getPersonName())));
+            $this->mail_from = trim($this->remove_emoji_chars(imap_utf8(strip_tags($this->mail_message->getHeader(HeaderConsts::FROM)->getPersonName()))));
             if (strlen(trim($this->mail_from)) == 0)
             {
-                $this->mail_from = utf8_encode(imap_utf8($this->replace_4byte($this->mail_message->getHeader(HeaderConsts::FROM))));
+                $this->mail_from = trim($this->remove_emoji_chars(imap_utf8(strip_tags($this->mail_message->getHeader(HeaderConsts::FROM)))));
             }
             $this->mail_from = trim(str_replace('From: ', '', $this->mail_from));
 
+
+            $now = new \DateTime();
 
 
             $this->pdf_document = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4', 'default_font_size' => 25, 'orientation' => 'P', 'ignore_table_widths' => true, 'shrink_tables_to_fit' => false ]);
@@ -136,7 +138,7 @@
             $this->pdf_document->SetAuthor($this->mail_from);
             $this->pdf_document->SetCreator('Newsletters To Kindle v'.$this->version);
 
-            $this->pdf_document->WriteHTML('<h1>'.$this->mail_subject.'</h1><h2>'.utf8_encode($this->mail_from).'</h2>');
+            $this->pdf_document->WriteHTML('<h2>'.$this->mail_subject.'</h2><p>'.utf8_encode($this->mail_from).'</p><p>'.$now->format('j-M-Y').'</p>');
             $this->pdf_document->AddPage();
 
             // chunk the email body because otherwise you can get issues with blank pages
@@ -212,4 +214,30 @@
             $text = str_replace(' ,', ',', trim($text));
             return iconv('ISO-8859-15', 'UTF-8', $text);  
         }
+
+        private function remove_emoji_chars($string) 
+        {
+
+            // Match Emoticons
+            $regex_emoticons = '/[\x{1F600}-\x{1F64F}]/u';
+            $clear_string = preg_replace($regex_emoticons, '', $string);
+        
+            // Match Miscellaneous Symbols and Pictographs
+            $regex_symbols = '/[\x{1F300}-\x{1F5FF}]/u';
+            $clear_string = preg_replace($regex_symbols, '', $clear_string);
+        
+            // Match Transport And Map Symbols
+            $regex_transport = '/[\x{1F680}-\x{1F6FF}]/u';
+            $clear_string = preg_replace($regex_transport, '', $clear_string);
+        
+            // Match Miscellaneous Symbols
+            $regex_misc = '/[\x{2600}-\x{26FF}]/u';
+            $clear_string = preg_replace($regex_misc, '', $clear_string);
+        
+            // Match Dingbats
+            $regex_dingbats = '/[\x{2700}-\x{27BF}]/u';
+            $clear_string = preg_replace($regex_dingbats, '', $clear_string);
+        
+            return $clear_string;
+        } 
     }
