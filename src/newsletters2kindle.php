@@ -86,7 +86,7 @@
             $imap_body = str_replace('<style type=3D"text/css">', '<style type="text/css">', $imap_body);
             $imap_body = str_replace('<style amf:inline=3D"amf:inline" type=3D"text/css">', '<style type="text/css">', $imap_body);
             $imap_body = str_replace('<style amf:inline="amf:inline" type="text/css">', '<style type="text/css">', $imap_body);
-            $imap_body = strip_tags($imap_body, '<style><a><p>><br><br /><b><strong><u><i><em><img><h1><h2><h3><h4><h5><h6>');
+            $imap_body = strip_tags($imap_body, '<style><a><p><br><br /><b><strong><u><i><em><img><h1><h2><h3><h4><h5><h6>');
             $imap_body = preg_replace('#<style type="text/css">.*?</style>#s', '', $imap_body);
     
             // create MailMimeParser
@@ -102,9 +102,9 @@
 
         private function makePDF()
         {
-
             // use the email subject as the subject of the PDF
-            $this->mail_subject = trim($this->remove_emoji_chars(imap_utf8(strip_tags($this->mail_message->getHeaderValue(HeaderConsts::SUBJECT)))));
+            $this->mail_subject = $this->remove_emoji_chars($this->mail_message->getHeaderValue(HeaderConsts::SUBJECT));
+
             if (strlen(trim($this->mail_subject)) == 0)
             {
                 $this->mail_subject = 'Newsletter';
@@ -114,7 +114,10 @@
                 $this->mail_subject = trim(substr($this->mail_subject, 3, strlen($this->mail_subject)-1));
             }
 
-            $this->mail_from = trim($this->remove_emoji_chars(imap_utf8(strip_tags($this->mail_message->getHeader(HeaderConsts::FROM)->getPersonName()))));
+
+            // use the email "from" field as the author
+            $this->mail_from = $this->remove_emoji_chars($this->mail_message->getHeader(HeaderConsts::FROM)->getPersonName());
+        
             if (strlen(trim($this->mail_from)) == 0)
             {
                 $this->mail_from = trim($this->remove_emoji_chars(imap_utf8(strip_tags($this->mail_message->getHeader(HeaderConsts::FROM)))));
@@ -122,7 +125,8 @@
             $this->mail_from = trim(str_replace('From: ', '', $this->mail_from));
 
 
-            $now = new \DateTime();
+            // use the mail datetime-stamp to date the document
+            $now = new \DateTime(imap_utf8($this->mail_message->getHeaderValue(HeaderConsts::DATE)));
 
 
             $this->pdf_document = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4', 'default_font_size' => 25, 'orientation' => 'P', 'ignore_table_widths' => true, 'shrink_tables_to_fit' => false ]);
@@ -138,7 +142,11 @@
             $this->pdf_document->SetAuthor($this->mail_from);
             $this->pdf_document->SetCreator('Newsletters To Kindle v'.$this->version);
 
-            $this->pdf_document->WriteHTML('<h2>'.$this->mail_subject.'</h2><p>'.utf8_encode($this->mail_from).'</p><p>'.$now->format('j-M-Y').'</p>');
+            $this->pdf_document->AddPage();
+            $this->pdf_document->WriteHTML('<h2>'.$this->mail_subject.'</h2>');
+            $this->pdf_document->WriteHTML('<p>Author: '.utf8_encode($this->mail_from).'</p>');
+            $this->pdf_document->WriteHTML('<p>Date: '.$now->format('j-M-Y').'</p>');
+            $this->pdf_document->WriteHTML('<p style ="border-bottom:2px solid black; width:100%; margin-bottom: 10px;">&nbsp;</p>');
             $this->pdf_document->AddPage();
 
             // chunk the email body because otherwise you can get issues with blank pages
@@ -205,6 +213,24 @@
         }
 
 
+
+
+        private function remove_emoji_chars($string) 
+        {
+            $string = trim(imap_utf8(strip_tags($string)));
+
+            
+            // remove all emojis, as it isn't compatible with PDF / Amazon Kindle format
+            $string = $this->replace_4byte($string);
+
+            if (strlen($string) == 0)
+            {
+                $string = $this->remove_emojis_without_iconv($string);
+            }
+ 
+            return $string;
+        }
+        
         // to remove 4byte characters like emojis etc..
         // https://stackoverflow.com/questions/12807176/php-writing-a-simple-removeemoji-function
         private function replace_4byte($text) 
@@ -215,9 +241,8 @@
             return iconv('ISO-8859-15', 'UTF-8', $text);  
         }
 
-        private function remove_emoji_chars($string) 
+        private function remove_emojis_without_iconv($string)
         {
-
             // Match Emoticons
             $regex_emoticons = '/[\x{1F600}-\x{1F64F}]/u';
             $clear_string = preg_replace($regex_emoticons, '', $string);
