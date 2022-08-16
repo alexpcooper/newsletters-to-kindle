@@ -30,7 +30,7 @@
 
         function __construct() 
         {
-            $this->version              = '1.3.1';
+            $this->version              = '1.4.2';
             $this->self_signed_cert     = false;
             $this->debug                = false;
             $this->delete_mail_after    = true;
