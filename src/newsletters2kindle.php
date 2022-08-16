@@ -1,8 +1,6 @@
 <?php 
     namespace AlexPCooper;
 
-//    require('vendor/autoload.php');
-
     use ZBateson\MailMimeParser\MailMimeParser;
     use ZBateson\MailMimeParser\Header\HeaderConsts;
     use PHPMailer\PHPMailer\PHPMailer;
@@ -20,6 +18,7 @@
         public $imap_user;
         public $imap_pass;
 
+        public $self_signed_cert;
         public $debug;
         public $delete_mail_after;
 
@@ -31,10 +30,12 @@
 
         function __construct() 
         {
-            $this->version              = '1.3.0';
+            $this->version              = '1.3.1';
+            $this->self_signed_cert     = false;
             $this->debug                = false;
             $this->delete_mail_after    = true;
-        }
+        }    
+        
 
         public function checkMail()
         {
@@ -62,7 +63,12 @@
 
         private function checkMailbox()
         {
-            $this->imap_conn = imap_open("{".trim($this->imap_host).":".trim($this->imap_port)."/imap/ssl}".$this->imap_dir, $this->imap_user, $this->imap_pass) or die('Failed to open connection: ' . imap_last_error());
+            $self_signed_cert = '';
+            if ($this->self_signed_cert)
+            {
+                $self_signed_cert = '/novalidate-cert';
+            }
+            $this->imap_conn = imap_open("{".trim($this->imap_host).":".trim($this->imap_port)."/imap/ssl".$self_signed_cert."}".$this->imap_dir, $this->imap_user, $this->imap_pass) or die('Failed to open connection: ' . imap_last_error());
 
             $msgs_number = 0;
             if ($this->imap_conn)
@@ -92,9 +98,6 @@
             // create MailMimeParser
             $mail_parser = new MailMimeParser();
             $this->mail_message = $mail_parser->parse($imap_body, true);
-
-            // var_dump($imap_body); die();
-            // var_dump($this->mail_message->getHtmlContent()); die();
 
             return true;
         }
